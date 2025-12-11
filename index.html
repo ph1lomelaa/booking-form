@@ -6,7 +6,7 @@
     <title>Бронирование</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        :root { --bg-color: #fff; --text-color: #000; --hint-color: #999; --btn-color: #3390ec; --btn-text: #fff; --secondary-bg: #f0f0f0; --active-bg: rgba(51, 144, 236, 0.15); }
+        :root { --bg-color: #fff; --text-color: #000; --hint-color: #999; --btn-color: rgb(48, 37, 37); --btn-text: #fff; --secondary-bg: #f0f0f0; --active-bg: rgba(236, 232, 227, 0.53); }
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: var(--bg-color); color: var(--text-color); margin: 0; padding: 15px; padding-bottom: 40px; }
 
         label { display: block; margin-top: 15px; margin-bottom: 6px; font-size: 13px; font-weight: 600; color: var(--hint-color); text-transform: uppercase; letter-spacing: 0.5px; }
@@ -17,7 +17,7 @@
         .row { display: flex; gap: 12px; } .col { flex: 1; }
         .city-buttons { display: flex; gap: 10px; } .city-buttons input { display: none; }
         .city-buttons label { flex: 1; padding: 14px; text-align: center; background-color: var(--secondary-bg); color: var(--text-color); border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer; border: 2px solid transparent; transition: all 0.2s; }
-        .city-buttons input:checked + label { background-color: var(--btn-color); color: var(--btn-text); border-color: var(--btn-color); box-shadow: 0 4px 12px rgba(51, 144, 236, 0.3); }
+        .city-buttons input:checked + label { background-color: var(--btn-color); color: var(--btn-text); border-color: var(--btn-color); box-shadow: 0 4px 12px rgba(236, 232, 227, 0.53); }
         .tourist-card { background-color: #fff; border: 1px solid #e0e0e0; border-radius: 12px; padding: 10px; margin-bottom: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         .tourist-name { font-size: 14px; font-weight: 700; margin-bottom: 5px; color: var(--btn-color); }
 
@@ -56,19 +56,18 @@
 
 <div class="divider"></div>
 
-<label>👥 Туристы:</label>
+<label>👥 Паломники:</label>
 <div id="pilgrims-container"></div>
 
 <div class="divider"></div>
 
 <div class="row">
-    <div class="col"><label>✈️ Авиа:</label><input type="text" id="avia" placeholder="KC 855 / Block"></div>
+    <div class="col"><label>AVIA:</label><input type="text" id="avia" placeholder="запрос на авиа"></div>
     <div class="col">
-        <label>🛂 Виза:</label>
+        <label>VISA:</label>
         <select id="visa">
             <option value="UMRAH VISA">UMRAH VISA</option>
             <option value="TOUR VISA">TOUR VISA</option>
-            <option value="KSA VISA">KSA VISA</option>
             <option value="NO VISA">NO VISA</option>
             <option value="OWN VISA">OWN VISA</option>
         </select>
@@ -77,16 +76,17 @@
 
 <div class="row">
     <div class="col">
-        <label>🛏 Номер:</label>
+        <label>Type of room:</label>
         <select id="room">
             <option value="Quad">Quad (4)</option>
             <option value="Triple">Triple (3)</option>
             <option value="Double">Double (2)</option>
             <option value="Single">Single (1)</option>
+
         </select>
     </div>
     <div class="col">
-        <label>🍽 Питание:</label>
+        <label>Type of meal:</label>
         <select id="meal">
             <option value="BB">BB</option>
             <option value="HB">HB</option>
@@ -97,7 +97,7 @@
 </div>
 
 <div id="train-block" style="display:none; margin-top: 15px;">
-    <label>🚆 Поезд:</label>
+    <label>TRAIN:</label>
     <select id="train">
         <option value="-">Нет</option>
         <option value="YES">✅ ДА</option>
@@ -107,14 +107,14 @@
 <div class="divider"></div>
 
 <div class="row">
-    <div class="col"><label>💰 Цена ($):</label><input type="tel" id="price" placeholder="1200" inputmode="numeric"></div>
-    <div class="col"><label>💵 Оплачено:</label><input type="tel" id="paid" placeholder="0" inputmode="numeric"></div>
+    <div class="col"><label> Сумма пакета:</label><input type="tel" id="price" placeholder="" inputmode="numeric"></div>
+    <div class="col"><label>Сумма оплачена:</label><input type="tel" id="paid" placeholder="" inputmode="numeric"></div>
 </div>
 
 <details style="margin-top: 20px; color: var(--btn-color); background: #fff; border-radius: 12px; padding: 5px; border: 1px solid var(--secondary-bg);">
     <summary style="font-weight: 600; padding: 10px; cursor: pointer;">📂 Дополнительно</summary>
     <div style="padding: 10px;">
-        <label>🌍 Регион:</label>
+        <label> Регион:</label>
         <select id="region">
             <option value="Almaty">Almaty</option>
             <option value="Astana">Astana</option>
@@ -123,22 +123,22 @@
             <option value="-">Другой</option>
         </select>
         <div class="row" style="margin-top: 15px;">
-            <div class="col"><label>📄 Договор:</label><input type="text" id="contract" placeholder="-"></div>
-            <div class="col"><label>💲 Курс:</label><input type="tel" id="rate" placeholder="495"></div>
+            <div class="col"><label>Договор:</label><input type="text" id="contract" placeholder="-"></div>
+            <div class="col"><label>Курс $:</label><input type="tel" id="rate" placeholder="495"></div>
         </div>
         <div class="row">
-            <div class="col"><label>🏷 Скидка:</label><input type="text" id="discount" placeholder="-"></div>
-            <div class="col"><label>📢 Источник:</label><input type="text" id="source" placeholder="Instagram"></div>
+            <div class="col"><label>Скидка от кого:</label><input type="text" id="discount" placeholder="-"></div>
+            <div class="col"><label>Источник:</label><input type="text" id="source" placeholder="Instagram"></div>
         </div>
     </div>
 </details>
 
-<label>👤 Менеджер:</label>
+<label>Менеджер:</label>
 <input type="text" id="manager" readonly style="opacity: 0.7; background: #e0e0e0;">
-<label>💬 Комментарий:</label>
+<label>Комментарий:</label>
 <textarea id="comment" rows="2"></textarea>
 
-<button class="submit-btn" onclick="sendData()">✅ СОЗДАТЬ ЗАЯВКУ</button>
+<button class="submit-btn" onclick="sendData()">✅ СОЗДАТЬ БРОНЬ</button>
 
 <script>
     let tg = window.Telegram.WebApp;
@@ -214,7 +214,7 @@
                 pCont.innerHTML += `
                     <div class="tourist-card">
                         <div class="tourist-name">👤 ${p.name}</div>
-                        <input type="tel" class="phone-input" placeholder="Телефон" value="${p.phone || ''}">
+                        <input type="tel" class="phone-input" placeholder="Номер телефона" value="${p.phone || ''}">
                     </div>`;
             });
         }
