@@ -6,185 +6,360 @@
     <title>Бронирование</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body { font-family: sans-serif; padding: 15px; padding-bottom: 50px; background-color: var(--tg-theme-bg-color, #fff); color: var(--tg-theme-text-color, #000); }
-        label { display: block; margin-top: 15px; font-weight: bold; color: var(--tg-theme-hint-color, #888); }
-        input, select, textarea { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; background: var(--tg-theme-secondary-bg-color, #f5f5f5); color: var(--tg-theme-text-color, #000); }
-        
-        .radio-group { display: flex; gap: 10px; margin-top: 5px; }
-        .radio-group label { background: var(--tg-theme-secondary-bg-color, #f0f0f0); padding: 10px; border-radius: 8px; flex: 1; text-align: center; cursor: pointer; border: 1px solid transparent; }
-        .radio-group input { display: none; }
-        .radio-group input:checked + label { background: #e6f0ff; border-color: #3390ec; color: #3390ec; font-weight: bold; }
+        :root {
+            --bg-color: var(--tg-theme-bg-color, #fff);
+            --text-color: var(--tg-theme-text-color, #000);
+            --hint-color: var(--tg-theme-hint-color, #999);
+            --btn-color: var(--tg-theme-button-color, #3390ec);
+            --btn-text: var(--tg-theme-button-text-color, #fff);
+            --secondary-bg: var(--tg-theme-secondary-bg-color, #f0f0f0);
+            --active-bg: rgba(51, 144, 236, 0.15);
+        }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: var(--bg-color); color: var(--text-color); margin: 0; padding: 15px; padding-bottom: 40px; }
 
-        .pilgrim-row { margin-bottom: 10px; padding: 10px; background: var(--tg-theme-secondary-bg-color, #f9f9f9); border-radius: 8px; display: flex; justify-content: space-between; align-items: center; }
-        .pilgrim-name { font-weight: 500; font-size: 14px; width: 40%; }
-        .pilgrim-phone { width: 55%; }
-        
-        button { width: 100%; padding: 15px; margin-top: 30px; background-color: var(--tg-theme-button-color, #3390ec); color: var(--tg-theme-button-text-color, #fff); border: none; border-radius: 10px; font-size: 18px; font-weight: bold; cursor: pointer; }
+        label { display: block; margin-top: 15px; margin-bottom: 6px; font-size: 13px; font-weight: 600; color: var(--hint-color); text-transform: uppercase; letter-spacing: 0.5px; }
+
+        /* === ЕДИНЫЙ СТИЛЬ ДЛЯ ВСЕХ ПОЛЕЙ === */
+        select, input, textarea, .tourist-box {
+            width: 100%;
+            padding: 14px; /* Одинаковый размер */
+            border: 1px solid transparent;
+            border-radius: 12px;
+            background-color: var(--secondary-bg);
+            color: var(--text-color);
+            font-size: 16px;
+            box-sizing: border-box;
+            outline: none;
+            transition: 0.2s;
+            margin-top: 0;
+        }
+        select:focus, input:focus, textarea:focus {
+            border-color: var(--btn-color);
+            background-color: var(--bg-color);
+            box-shadow: 0 0 0 3px rgba(51, 144, 236, 0.1);
+        }
+
+        .row { display: flex; gap: 12px; }
+        .col { flex: 1; }
+
+        /* === КНОПКИ ГОРОДА === */
+        .city-buttons { display: flex; gap: 10px; }
+        .city-buttons input { display: none; }
+        .city-buttons label {
+            flex: 1;
+            padding: 14px;
+            text-align: center;
+            background-color: var(--secondary-bg);
+            color: var(--text-color);
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.2s;
+        }
+        .city-buttons input:checked + label {
+            background-color: var(--btn-color);
+            color: var(--btn-text);
+            border-color: var(--btn-color);
+            box-shadow: 0 4px 12px rgba(51, 144, 236, 0.3);
+        }
+
+        /* === КАРТОЧКА ТУРИСТА === */
+        .tourist-card {
+            background-color: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .tourist-name {
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 5px;
+            color: var(--btn-color);
+        }
+
+        button.submit-btn { width: 100%; padding: 16px; margin-top: 30px; border: none; border-radius: 14px; background-color: var(--btn-color); color: var(--btn-text); font-size: 16px; font-weight: 700; cursor: pointer; }
+        button:active { transform: scale(0.98); }
+
+        .info-box { background-color: var(--active-bg); padding: 12px; border-radius: 12px; font-size: 14px; font-weight: 500; margin-bottom: 20px; text-align: center; color: var(--btn-color); border: 1px solid var(--btn-color); }
+
+        #train-block { display: none; margin-top: 15px; }
+        .divider { height: 1px; background-color: var(--secondary-bg); margin: 25px 0; }
     </style>
 </head>
 <body>
 
-<div id="app">
-    <h3>📦 Оформление заявки</h3>
-    
-    <label>Пакет:</label>
-    <select id="pkg_name"></select>
+<div id="date-display" class="info-box">📅 Загрузка...</div>
 
-    <label>Город вылета:</label>
-    <div class="radio-group">
-        <input type="radio" id="c1" name="city" value="Алматы" checked><label for="c1">Алматы</label>
-        <input type="radio" id="c2" name="city" value="Астана"><label for="c2">Астана</label>
-        <input type="radio" id="c3" name="city" value="Ташкент"><label for="c3">Ташкент</label>
-        <input type="radio" id="c4" name="city" value="Шымкент"><label for="c4">Шымкент</label>
-    </div>
+<label>📦 Пакет:</label>
+<select id="pkg_name" style="font-weight: bold;">
+    <option value="" disabled selected>Ищу пакеты...</option>
+</select>
 
-    <label>👥 Телефоны туристов:</label>
-    <div id="pilgrims_container"></div>
+<label>🛫 Город вылета:</label>
+<div class="city-buttons">
+    <input type="radio" name="city" id="c_ala" value="Almaty" checked>
+    <label for="c_ala">Almaty</label>
 
-    <label>🛏 Тип номера:</label>
-    <select id="room">
-        <option value="Quadro">Quadro (4-х)</option>
-        <option value="Triple">Triple (3-х)</option>
-        <option value="Double">Double (2-х)</option>
-        <option value="Single">Single (1)</option>
-    </select>
-
-    <div style="display:none;">
-        <input id="train" value="-">
-        <input id="region" value="-">
-    </div>
-
-    <label>🛂 Виза:</label>
-    <input type="text" id="visa" value="Умра Виза">
-
-    <label>✈️ Авиа:</label>
-    <input type="text" id="avia" value="Блок">
-
-    <label>🍽 Питание:</label>
-    <select id="meal">
-        <option value="BB">Завтраки (BB)</option>
-        <option value="HB">Завтраки+Ужины (HB)</option>
-        <option value="FB">3-х разовое (FB)</option>
-    </select>
-
-    <label>💰 Цена ($):</label>
-    <input type="number" id="price" placeholder="1250">
-
-    <label>💵 Оплачено ($):</label>
-    <input type="number" id="paid" placeholder="0">
-
-    <label>Курс:</label>
-    <input type="number" id="rate" placeholder="490">
-
-    <label>Скидка:</label>
-    <input type="text" id="discount" placeholder="-">
-
-    <label>Источник:</label>
-    <input type="text" id="source" placeholder="Инстаграм">
-
-    <label>Менеджер:</label>
-    <input type="text" id="manager" placeholder="Имя">
-
-    <label>Комментарий:</label>
-    <textarea id="comment" rows="2"></textarea>
-
-    <button id="submitBtn" type="button">✅ Создать заявку</button>
+    <input type="radio" name="city" id="c_ast" value="Astana">
+    <label for="c_ast">Astana</label>
 </div>
 
+<div class="divider"></div>
+
+<label>👥 Туристы и Телефоны:</label>
+<div id="pilgrims-container">
+    <div class="tourist-card">
+        <div class="tourist-name">👤 Турист 1</div>
+        <input type="tel" class="phone-input" placeholder="+7 (___) ___-__-__">
+    </div>
+</div>
+
+<div class="divider"></div>
+
+<div class="row">
+    <div class="col">
+        <label>✈️ Авиа:</label>
+        <input type="text" id="avia" placeholder="KC 855 / Block">
+    </div>
+    <div class="col">
+        <label>🛂 Виза:</label>
+        <select id="visa">
+            <option value="UMRAH VISA">UMRAH VISA</option>
+            <option value="TOUR VISA">TOUR VISA</option>
+            <option value="KSA VISA">KSA VISA</option>
+            <option value="NO VISA">NO VISA</option>
+            <option value="OWN VISA">OWN VISA</option>
+        </select>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col">
+        <label>🛏 Номер:</label>
+        <select id="room">
+            <option value="Quad">Quad (4)</option>
+            <option value="Triple">Triple (3)</option>
+            <option value="Double">Double (2)</option>
+            <option value="Single">Single (1)</option>
+        </select>
+    </div>
+    <div class="col">
+        <label>🍽 Питание:</label>
+        <select id="meal">
+            <option value="BB">BB (Завтрак)</option>
+            <option value="HB">HB (+Ужин)</option>
+            <option value="FB">FB (3-раз)</option>
+            <option value="RO">RO (Без еды)</option>
+        </select>
+    </div>
+</div>
+
+<div id="train-block">
+    <label>🚆 Поезд (есть в пакете):</label>
+    <select id="train">
+        <option value="-">Нет, не нужен</option>
+        <option value="YES">✅ ДА, НУЖЕН</option>
+    </select>
+</div>
+
+<div class="divider"></div>
+
+<div class="row">
+    <div class="col">
+        <label>💰 Цена ($):</label>
+        <input type="tel" id="price" placeholder="1200" inputmode="numeric">
+    </div>
+    <div class="col">
+        <label>💵 Оплачено:</label>
+        <input type="tel" id="paid" placeholder="0" inputmode="numeric">
+    </div>
+</div>
+
+<details style="margin-top: 20px; color: var(--btn-color); background: #fff; border-radius: 12px; padding: 5px; border: 1px solid var(--secondary-bg);">
+    <summary style="font-weight: 600; padding: 10px; cursor: pointer;">📂 Дополнительно (Регион, Договор...)</summary>
+
+    <div style="padding: 10px;">
+        <label>🌍 Регион (Прописка):</label>
+        <select id="region">
+            <option value="Almaty" selected>Almaty</option>
+            <option value="Astana">Astana</option>
+            <option value="Aktau">Aktau</option>
+            <option value="Shymkent">Shymkent</option>
+            <option disabled>──────────</option>
+            <option value="Atyrau">Atyrau</option>
+            <option value="Aktobe">Aktobe</option>
+            <option value="Karaganda">Karaganda</option>
+            <option value="Taraz">Taraz</option>
+            <option value="Oskemen">Oskemen</option>
+            <option value="Semey">Semey</option>
+            <option value="Pavlodar">Pavlodar</option>
+            <option value="Uralsk">Uralsk</option>
+            <option value="Kostanay">Kostanay</option>
+            <option value="Kyzylorda">Kyzylorda</option>
+            <option value="Turkestan">Turkestan</option>
+            <option value="Kokshetau">Kokshetau</option>
+        </select>
+
+        <div class="row" style="margin-top: 15px;">
+            <div class="col">
+                <label>📄 Договор №:</label>
+                <input type="text" id="contract" placeholder="-">
+            </div>
+            <div class="col">
+                <label>💲 Курс:</label>
+                <input type="tel" id="rate" placeholder="495">
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col">
+                <label>🏷 Скидка:</label>
+                <input type="text" id="discount" placeholder="-">
+            </div>
+            <div class="col">
+                <label>📢 Источник:</label>
+                <input type="text" id="source" placeholder="Instagram">
+            </div>
+        </div>
+    </div>
+</details>
+
+<label>👤 Менеджер:</label>
+<input type="text" id="manager" readonly style="opacity: 0.7; background: #e0e0e0;">
+
+<label>💬 Комментарий:</label>
+<textarea id="comment" rows="2" placeholder="Важные детали..."></textarea>
+
+<button id="sendBtn" class="submit-btn">✅ СОЗДАТЬ ЗАЯВКУ</button>
+
 <script>
-    const tg = window.Telegram.WebApp;
+    let tg = window.Telegram.WebApp;
     tg.expand();
 
-    // 1. БЕЗОПАСНАЯ ФУНКЦИЯ (Никогда не падает)
-    function safeGet(id) {
-        let el = document.getElementById(id);
-        if (el) return el.value;
-        return "-"; // Если элемента нет, возвращаем прочерк
-    }
-
-    // Инициализация
     try {
-        const params = new URLSearchParams(window.location.search);
-        
-        // Пакеты
-        const pkgSelect = document.getElementById('pkg_name');
-        const pkgs = (params.get('packages') || "").split('|');
-        pkgs.forEach(p => {
-            if(p) {
-                let opt = document.createElement('option');
-                opt.value = p; opt.innerText = p;
-                pkgSelect.appendChild(opt);
-            }
-        });
+        const urlParams = new URLSearchParams(window.location.search);
 
-        // Туристы
-        const pCont = document.getElementById('pilgrims_container');
-        const pData = JSON.parse(params.get('pilgrims') || "[]");
-        pData.forEach((p, i) => {
-            pCont.innerHTML += `
-                <div class="pilgrim-row">
-                    <span class="pilgrim-name">${i+1}. ${p.name}</span>
-                    <div class="pilgrim-phone"><input class="ph-input" placeholder="Телефон" value="${p.phone||''}"></div>
-                </div>`;
-        });
+        // 1. ДАТА
+        const dateString = urlParams.get('date');
+        if (dateString) {
+            document.getElementById('date-display').innerText = `📅 Вылет: ${dateString}`;
+        }
+
+        // 2. СПИСОК ТУРИСТОВ
+        const pilgrimsRaw = urlParams.get('pilgrims');
+        const pilgrimsContainer = document.getElementById('pilgrims-container');
+
+        if (pilgrimsRaw) {
+            try {
+                const pilgrims = JSON.parse(decodeURIComponent(pilgrimsRaw));
+                pilgrimsContainer.innerHTML = ""; // Очищаем заглушку
+
+                pilgrims.forEach((p, index) => {
+                    let div = document.createElement('div');
+                    div.className = 'tourist-card';
+                    div.innerHTML = `
+                            <div class="tourist-name">👤 ${p.name}</div>
+                            <input type="tel" class="phone-input" placeholder="Телефон" value="${p.phone || ''}">
+                        `;
+                    pilgrimsContainer.appendChild(div);
+                });
+            } catch (e) {
+                console.error("Ошибка парсинга людей");
+            }
+        }
+
+        // 3. ПАКЕТЫ
+        const pkgString = urlParams.get('packages');
+        const select = document.getElementById('pkg_name');
+        select.innerHTML = "";
+
+        if (pkgString) {
+            const packages = decodeURIComponent(pkgString).split('|');
+            packages.forEach(pkg => {
+                let opt = document.createElement('option');
+                opt.value = pkg; opt.innerText = pkg;
+                select.appendChild(opt);
+            });
+        } else {
+            let opt = document.createElement('option');
+            opt.innerText = "Пакеты не найдены";
+            select.appendChild(opt);
+        }
+
+        // 4. ПОЕЗД
+        const hasTrain = urlParams.get('train');
+        if (hasTrain === '1') {
+            document.getElementById('train-block').style.display = 'block';
+        }
+
+        // 5. МЕНЕДЖЕР
+        if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
+            document.getElementById('manager').value = tg.initDataUnsafe.user.first_name;
+        }
 
     } catch (e) {
-        alert("Ошибка старта: " + e.message); // Покажет ошибку при загрузке
+        tg.showPopup({title: "Ошибка Старта", message: e.toString()});
     }
 
-    // НАЖАТИЕ КНОПКИ
-    document.getElementById('submitBtn').addEventListener('click', function() {
-        // Меняем текст кнопки, чтобы было видно нажатие
-        this.innerText = "⏳ Отправка...";
-        
+    // 6. ОТПРАВКА (ИСПРАВЛЕННАЯ ФУНКЦИЯ)
+    document.getElementById('sendBtn').addEventListener('click', function() {
+        let btn = this;
+
         try {
-            // Сбор телефонов
-            let phones = [];
-            document.querySelectorAll('.ph-input').forEach(i => phones.push(i.value || "-"));
-
-            // Сбор города (безопасно)
-            let cityEl = document.querySelector('input[name="city"]:checked');
-            let cityVal = cityEl ? cityEl.value : "Алматы";
-
-            // Сбор объекта данных через safeGet
-            let data = {
-                phones: phones,
-                pkg_name: safeGet("pkg_name"),
-                city: cityVal,
-                room: safeGet("room"),
-                train: safeGet("train"),
-                visa: safeGet("visa"),
-                avia: safeGet("avia"),
-                meal: safeGet("meal"),
-                price: safeGet("price"),
-                paid: safeGet("paid"),
-                contract: "-", // Убрали ID contract, шлем прочерк
-                rate: safeGet("rate"),
-                discount: safeGet("discount"),
-                source: safeGet("source"),
-                region: safeGet("region"), // Теперь безопасно вернет "-"
-                manager: safeGet("manager"),
-                comment: safeGet("comment")
-            };
-
-            // Проверка цены
-            if (!data.price || data.price === "-") {
-                alert("Пожалуйста, введите Цену!");
-                this.innerText = "✅ Создать заявку";
+            let price = document.getElementById("price").value;
+            if (!price) {
+                tg.showPopup({title: "Ошибка", message: "Укажите цену!"});
                 return;
             }
 
-            // ОТПРАВКА
+            // Индикация нажатия
+            btn.innerText = "⏳ Отправка...";
+            btn.style.opacity = "0.7";
+
+            // Собираем телефоны
+            let phones = [];
+            document.querySelectorAll('.phone-input').forEach(input => {
+                phones.push(input.value || "-");
+            });
+
+            // Город из кнопок
+            let selectedCity = document.querySelector('input[name="city"]:checked').value;
+
+            // Получаем значения безопасно
+            let data = {
+                phones: phones,
+                pkg_name: document.getElementById("pkg_name").value,
+                city: selectedCity,
+                room: document.getElementById("room").value,
+                train: document.getElementById("train") ? document.getElementById("train").value : "-",
+                visa: document.getElementById("visa").value,
+                avia: document.getElementById("avia").value,
+                meal: document.getElementById("meal").value,
+                price: price,
+                paid: document.getElementById("paid").value || "0",
+                contract: document.getElementById("contract").value || "-",
+                rate: document.getElementById("rate").value || "-",
+                discount: document.getElementById("discount").value || "-",
+                source: document.getElementById("source").value || "-",
+                region: document.getElementById("region").value,
+                manager: document.getElementById("manager").value,
+                comment: document.getElementById("comment").value
+            };
+
+            // ГЛАВНОЕ ИСПРАВЛЕНИЕ: ОТПРАВКА + ЗАКРЫТИЕ
             tg.sendData(JSON.stringify(data));
-            
-            // ЗАКРЫТИЕ С ЗАДЕРЖКОЙ (Чтобы данные успели уйти)
+
             setTimeout(function() {
                 tg.close();
-            }, 300);
+            }, 100);
 
         } catch (error) {
-            alert("ОШИБКА: " + error.message); // ЭТО ОКНО ПОКАЖЕТ ГДЕ ПРОБЛЕМА
-            this.innerText = "❌ Ошибка";
+            alert("Ошибка JS: " + error.message);
+            btn.innerText = "❌ Ошибка";
         }
     });
 </script>
