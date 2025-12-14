@@ -210,10 +210,10 @@
     <div class="col">
         <label>Type of room:</label>
         <select id="room">
-            <option value="Quad">Quad (4)</option>
-            <option value="Triple">Triple (3)</option>
-            <option value="Double">Double (2)</option>
-            <option value="Single">Single (1)</option>
+            <option value="Quad">Quadro</option>
+            <option value="Triple">Triple</option>
+            <option value="Double">Double</option>
+            <option value="Single">Single</option>
 
         </select>
     </div>
@@ -281,68 +281,17 @@
         return el ? el.value : "-";
     }
 
-    let allPackagesData = [];
-
     try {
         const urlParams = new URLSearchParams(window.location.search);
 
-        // 1. ЗАГРУЖАЕМ ВСЕ ДАННЫЕ
-        const rawDump = urlParams.get('dump');
-        if (rawDump) {
-            allPackagesData = JSON.parse(decodeURIComponent(rawDump));
-        }
+        // 0) API BASE (приходит из бота как параметр api=...)
+        const API_BASE = urlParams.get('api'); // например https://YOUR-DOMAIN.COM
 
-        // 2. ЛОГИКА ВВОДА ДАТЫ (Вместо Select)
+        // 1) ЭЛЕМЕНТЫ
         const dateInput = document.getElementById('date_input');
         const pkgSelect = document.getElementById('pkg_name');
 
-        // Слушаем ввод текста
-        dateInput.addEventListener('input', function() {
-            let val = this.value;
-
-            // Авто-замена: пробел или слэш на точку (для удобства)
-            val = val.replace(/[\/\s,]/g, '.');
-
-            // Ищем совпадения в базе (строгое совпадение по дате, например "15.01")
-            const filtered = allPackagesData.filter(item => item.d === val);
-
-            // Очищаем список пакетов
-            pkgSelect.innerHTML = '';
-
-            if (filtered.length > 0) {
-                // Если нашли рейсы
-                pkgSelect.disabled = false;
-                let defOpt = document.createElement('option');
-                defOpt.text = `Найдено: ${filtered.length} шт. (Выберите)`;
-                defOpt.disabled = true;
-                defOpt.selected = true;
-                pkgSelect.appendChild(defOpt);
-
-                filtered.forEach(item => {
-                    let opt = document.createElement('option');
-                    opt.value = item.n;
-                    opt.innerText = item.n;
-                    opt.setAttribute('data-sheet', item.s);
-                    opt.setAttribute('data-table', item.t);
-                    pkgSelect.appendChild(opt);
-                });
-            } else {
-                // Если не нашли
-                pkgSelect.disabled = true;
-                let opt = document.createElement('option');
-                opt.innerText = val.length < 3 ? "Введите дату..." : "❌ Рейсов нет";
-                pkgSelect.appendChild(opt);
-            }
-        });
-
-        // 3. СОХРАНЯЕМ ID ПРИ ВЫБОРЕ ПАКЕТА
-        pkgSelect.addEventListener('change', function() {
-            const opt = this.options[this.selectedIndex];
-            document.getElementById('sheet_name_hidden').value = opt.getAttribute('data-sheet');
-            document.getElementById('table_id_hidden').value = opt.getAttribute('data-table');
-        });
-
-        // 4. ТУРИСТЫ
+        // 2) ТУРИСТЫ (как было)
         const pilgrimsRaw = urlParams.get('pilgrims');
         const pCont = document.getElementById('pilgrims-container');
         if (pilgrimsRaw) {
@@ -361,6 +310,105 @@
             document.getElementById('manager').value = tg.initDataUnsafe.user.first_name;
         }
 
+        // 3) ФУНКЦИЯ ЗАГРУЗКИ ПАКЕТОВ ПО ДАТЕ С БЭКА
+        async function fetchPackagesByDate(ddmm) {
+            if (!API_BASE) {
+                throw new Error("API base URL not provided (missing ?api= in WebApp URL)");
+            }
+
+            const url = `${API_BASE.replace(/\/$/, '')}/api/packages?date=${encodeURIComponent(ddmm)}`;
+            const resp = await fetch(url, { method: "GET" });
+
+            if (!resp.ok) {
+                throw new Error(`API error: ${resp.status}`);
+            }
+
+            // ожидаем JSON вида:
+            // { found: true/false, data: [{d,n,s,t}, ...], error?: "..." }
+            // или { packages: [...] }
+            const payload = await resp.json();
+
+            // Поддержка двух форматов ответа:
+            if (Array.isArray(payload)) return payload;
+            if (Array.isArray(payload.data)) return payload.data;
+            if (Array.isArray(payload.packages)) return payload.packages;
+
+            return [];
+        }
+
+        // 4) ЛОГИКА ВВОДА ДАТЫ (debounce + fetch)
+        let debounceTimer = null;
+
+        dateInput.addEventListener('input', function () {
+            let val = this.value;
+
+            // Авто-замена: пробел или слэш на точку (как было)
+            val = val.replace(/[\/\s,]/g, '.').trim();
+            this.value = val;
+
+            // Сброс выбранного пакета при изменении даты
+            document.getElementById('sheet_name_hidden').value = "";
+            document.getElementById('table_id_hidden').value = "";
+
+            // Подготовка UI
+            pkgSelect.innerHTML = '';
+            pkgSelect.disabled = true;
+
+            if (val.length < 4) {
+                let opt = document.createElement('option');
+                opt.innerText = "Введите дату...";
+                pkgSelect.appendChild(opt);
+                return;
+            }
+
+            // debounce чтобы не слать запросы на каждый символ
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(async () => {
+                pkgSelect.innerHTML = '<option>⏳ Ищу рейсы...</option>';
+                pkgSelect.disabled = true;
+
+                try {
+                    const list = await fetchPackagesByDate(val);
+
+                    pkgSelect.innerHTML = '';
+
+                    if (list.length > 0) {
+                        pkgSelect.disabled = false;
+
+                        let defOpt = document.createElement('option');
+                        defOpt.text = `Найдено: ${list.length} шт. (Выберите)`;
+                        defOpt.disabled = true;
+                        defOpt.selected = true;
+                        pkgSelect.appendChild(defOpt);
+
+                        list.forEach(item => {
+                            let opt = document.createElement('option');
+                            opt.value = item.n;
+                            opt.innerText = item.n;
+                            opt.setAttribute('data-sheet', item.s);
+                            opt.setAttribute('data-table', item.t);
+                            pkgSelect.appendChild(opt);
+                        });
+                    } else {
+                        pkgSelect.disabled = true;
+                        let opt = document.createElement('option');
+                        opt.innerText = "❌ Рейсов нет";
+                        pkgSelect.appendChild(opt);
+                    }
+                } catch (e) {
+                    pkgSelect.disabled = true;
+                    pkgSelect.innerHTML = '<option>⚠️ Ошибка поиска</option>';
+                }
+            }, 350);
+        });
+
+        // 5) СОХРАНЯЕМ ID ПРИ ВЫБОРЕ ПАКЕТА (как было)
+        pkgSelect.addEventListener('change', function () {
+            const opt = this.options[this.selectedIndex];
+            document.getElementById('sheet_name_hidden').value = opt.getAttribute('data-sheet') || "";
+            document.getElementById('table_id_hidden').value = opt.getAttribute('data-table') || "";
+        });
+
     } catch (e) {
         tg.showPopup({
             title: "Ошибка",
@@ -368,7 +416,7 @@
         });
     }
 
-    // 5. ОТПРАВКА
+    // 6) ОТПРАВКА (не меняю, кроме мелких безопасных проверок)
     function sendData() {
         try {
             let price = document.getElementById("price").value;
@@ -376,17 +424,11 @@
             let sheetName = document.getElementById("sheet_name_hidden").value;
 
             if (!price) {
-                tg.showPopup({
-                    title: "Ошибка",
-                    message: "Укажите цену!"
-                });
+                tg.showPopup({ title: "Ошибка", message: "Укажите цену!" });
                 return;
             }
             if (!pkgName || !sheetName) {
-                tg.showPopup({
-                    title: "Ошибка",
-                    message: "Введите дату и выберите пакет!"
-                });
+                tg.showPopup({ title: "Ошибка", message: "Введите дату и выберите пакет!" });
                 return;
             }
 
@@ -428,6 +470,7 @@
         }
     }
 </script>
+
 </body>
 
 </html>
