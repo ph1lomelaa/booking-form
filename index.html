@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="ru">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -16,164 +15,71 @@
             --secondary-bg: #f0f0f0;
             --active-bg: rgb(255, 255, 255);
         }
-
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             background-color: var(--bg-color);
             color: var(--text-color);
-            margin: 0;
-            padding: 15px;
-            padding-bottom: 40px;
+            margin: 0; padding: 15px; padding-bottom: 40px;
         }
-
         label {
-            display: block;
-            margin-top: 15px;
-            margin-bottom: 6px;
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--hint-color);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+            display: block; margin-top: 15px; margin-bottom: 6px;
+            font-size: 13px; font-weight: 600; color: var(--hint-color);
+            text-transform: uppercase; letter-spacing: 0.5px;
         }
-
-        select,
-        input,
-        textarea,
-        .tourist-box {
-            width: 100%;
-            padding: 14px;
-            border: 1px solid transparent;
-            border-radius: 12px;
-            background-color: var(--secondary-bg);
-            color: var(--text-color);
-            font-size: 16px;
-            box-sizing: border-box;
-            outline: none;
-            transition: 0.2s;
-            margin-top: 0;
+        select, input, textarea {
+            width: 100%; padding: 14px; border: 1px solid transparent;
+            border-radius: 12px; background-color: var(--secondary-bg);
+            color: var(--text-color); font-size: 16px; box-sizing: border-box;
+            outline: none; transition: 0.2s;
         }
-
-        select:focus,
-        input:focus,
-        textarea:focus {
-            border-color: var(--btn-color);
-            background-color: var(--bg-color);
+        select:focus, input:focus, textarea:focus {
+            border-color: var(--btn-color); background-color: var(--bg-color);
             box-shadow: 0 0 0 3px rgba(51, 144, 236, 0.1);
         }
-
-        .row {
-            display: flex;
-            gap: 12px;
-        }
-
-        .col {
-            flex: 1;
-        }
-
-        .city-buttons {
-            display: flex;
-            gap: 10px;
-        }
-
-        .city-buttons input {
-            display: none;
-        }
-
+        .row { display: flex; gap: 12px; }
+        .col { flex: 1; }
+        .city-buttons { display: flex; gap: 10px; }
+        .city-buttons input { display: none; }
         .city-buttons label {
-            flex: 1;
-            padding: 14px;
-            text-align: center;
-            background-color: var(--secondary-bg);
-            color: var(--text-color);
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            border: 2px solid transparent;
-            transition: all 0.2s;
+            flex: 1; padding: 14px; text-align: center;
+            background-color: var(--secondary-bg); color: var(--text-color);
+            border-radius: 12px; font-size: 16px; font-weight: 600;
+            cursor: pointer; border: 2px solid transparent; transition: all 0.2s;
         }
-
         .city-buttons input:checked+label {
-            background-color: var(--btn-color);
-            color: var(--btn-text);
+            background-color: var(--btn-color); color: var(--btn-text);
             border-color: var(--btn-color);
-            box-shadow: 0 4px 12px rgb(255, 255, 255);
         }
-
         .tourist-card {
-            background-color: #fff;
-            border: 1px solid #e0e0e0;
-            border-radius: 12px;
-            padding: 10px;
-            margin-bottom: 10px;
+            background-color: #fff; border: 1px solid #e0e0e0;
+            border-radius: 12px; padding: 10px; margin-bottom: 10px;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
         }
-
-        .tourist-name {
-            font-size: 14px;
-            font-weight: 700;
-            margin-bottom: 5px;
-            color: var(--btn-color);
+        .tourist-name { font-size: 14px; font-weight: 700; margin-bottom: 5px; color: var(--btn-color); }
+        .submit-btn {
+            width: 100%; padding: 16px; margin-top: 30px; border: none;
+            border-radius: 14px; background-color: var(--btn-color);
+            color: var(--btn-text); font-size: 16px; font-weight: 700; cursor: pointer;
         }
-
-        button.submit-btn {
-            width: 100%;
-            padding: 16px;
-            margin-top: 30px;
-            border: none;
-            border-radius: 14px;
-            background-color: var(--btn-color);
-            color: var(--btn-text);
-            font-size: 16px;
-            font-weight: 700;
-            cursor: pointer;
-        }
-
-        button:active {
-            transform: scale(0.98);
-        }
-
-        .divider {
-            height: 1px;
-            background-color: var(--secondary-bg);
-            margin: 25px 0;
-        }
-
-        /* Стиль для выбора дат (выделяем его) */
+        .divider { height: 1px; background-color: var(--secondary-bg); margin: 25px 0; }
         .smart-select-box {
-            background: var(--active-bg);
-            padding: 15px;
-            border-radius: 12px;
-            border: 1px solid var(--btn-color);
-            margin-bottom: 20px;
-        }
-
-        .smart-label {
-            color: var(--btn-color);
-            margin-top: 0;
-        }
-
-        /* Подсветка поля ввода даты */
-        #date_input {
-            border: 2px solid var(--btn-color);
-            background: #fff;
-            font-weight: bold;
-            font-size: 18px;
-            text-align: center;
+            background: var(--active-bg); padding: 15px; border-radius: 12px;
+            border: 1px solid var(--btn-color); margin-bottom: 20px;
         }
     </style>
 </head>
-
 <body>
 
 <div class="smart-select-box">
-    <label class="smart-label">1. Напишите дату вылета:</label>
-    <input type="text" id="date_input" placeholder="ДД.ММ (напр. 15.01)" inputmode="decimal">
+    <label>📅 1. Дата вылета:</label>
+    <div style="display: flex; gap: 10px;">
+        <input type="text" id="date_input" placeholder="13.12" style="flex: 1; text-align: center; font-weight: bold;">
+        <button type="button" onclick="apiSearch()" style="background: var(--btn-color); color: white; border: none; border-radius: 12px; padding: 0 20px; font-weight: bold;">Найти</button>
+    </div>
 
-    <label class="smart-label" style="margin-top: 15px;"> 2. Выберите пакет:</label>
-    <select id="pkg_name" disabled style="background: #fff;">
-        <option value="">Сначала введите дату </option>
+    <label style="margin-top: 15px;">📦 2. Выберите пакет:</label>
+    <select id="pkg_name" disabled>
+        <option value="">Введите дату и нажмите «Найти»</option>
     </select>
 </div>
 
@@ -187,14 +93,12 @@
 </div>
 
 <div class="divider"></div>
-
 <label>👥 Паломники:</label>
 <div id="pilgrims-container"></div>
-
 <div class="divider"></div>
 
 <div class="row">
-    <div class="col"><label>AVIA:</label><input type="text" id="avia" placeholder="запрос на авиа"></div>
+    <div class="col"><label>AVIA:</label><input type="text" id="avia" placeholder="Запрос"></div>
     <div class="col">
         <label>VISA:</label>
         <select id="visa">
@@ -208,17 +112,16 @@
 
 <div class="row">
     <div class="col">
-        <label>Type of room:</label>
+        <label>Тип номера:</label>
         <select id="room">
             <option value="Quad">Quadro</option>
             <option value="Triple">Triple</option>
             <option value="Double">Double</option>
             <option value="Single">Single</option>
-
         </select>
     </div>
     <div class="col">
-        <label>Type of meal:</label>
+        <label>Питание:</label>
         <select id="meal">
             <option value="BB">BB</option>
             <option value="HB">HB</option>
@@ -228,38 +131,27 @@
     </div>
 </div>
 
-<div id="train-block" style="display:none; margin-top: 15px;">
-    <label>TRAIN:</label>
-    <select id="train">
-        <option value="-">Нет</option>
-        <option value="YES">✅ ДА</option>
-    </select>
+<div class="row" style="margin-top: 20px;">
+    <div class="col"><label>Сумма пакета:</label><input type="tel" id="price" inputmode="numeric"></div>
+    <div class="col"><label>Оплачено:</label><input type="tel" id="paid" inputmode="numeric"></div>
 </div>
 
-<div class="divider"></div>
-
-<div class="row">
-    <div class="col"><label> Сумма пакета:</label><input type="tel" id="price" placeholder="" inputmode="numeric"></div>
-    <div class="col"><label>Сумма оплачена:</label><input type="tel" id="paid" placeholder="" inputmode="numeric"></div>
-</div>
-
-<details style="margin-top: 20px; color: var(--btn-color); background: #fff; border-radius: 12px; padding: 5px; border: 1px solid var(--secondary-bg);">
+<details style="margin-top: 20px; background: #fff; border-radius: 12px; padding: 5px; border: 1px solid var(--secondary-bg);">
     <summary style="font-weight: 600; padding: 10px; cursor: pointer;">📂 Дополнительно</summary>
     <div style="padding: 10px;">
-        <label> Регион:</label>
+        <label>Регион:</label>
         <select id="region">
             <option value="Almaty">Almaty</option>
             <option value="Astana">Astana</option>
             <option value="Shymkent">Shymkent</option>
-            <option value="Aktau">Aktau</option>
             <option value="-">Другой</option>
         </select>
-        <div class="row" style="margin-top: 15px;">
+        <div class="row">
             <div class="col"><label>Договор:</label><input type="text" id="contract" placeholder="-"></div>
             <div class="col"><label>Курс $:</label><input type="tel" id="rate" placeholder="495"></div>
         </div>
         <div class="row">
-            <div class="col"><label>Скидка от кого:</label><input type="text" id="discount" placeholder="-"></div>
+            <div class="col"><label>Скидка:</label><input type="text" id="discount" placeholder="-"></div>
             <div class="col"><label>Источник:</label><input type="text" id="source" placeholder="Instagram"></div>
         </div>
     </div>
@@ -276,201 +168,117 @@
     let tg = window.Telegram.WebApp;
     tg.expand();
 
+    // 🛑 ОДИН АДРЕС ДЛЯ ВСЕГО
+    const API_URL = "https://gainless-computably-pablo.ngrok-free.dev";
+
+    const dateInput = document.getElementById('date_input');
+    const pkgSelect = document.getElementById('pkg_name');
+
+    // Функция поиска (вызывается кнопкой и при вводе 5 символов)
+    async function apiSearch() {
+        let date = dateInput.value.trim().replace(/[\/\s,]/g, '.');
+        dateInput.value = date;
+
+        if (date.length < 5) return;
+
+        try {
+            pkgSelect.disabled = true;
+            pkgSelect.innerHTML = '<option>⏳ Поиск рейсов...</option>';
+
+            const response = await fetch(`${API_URL}/api/packages?date=${date}`);
+            const res = await response.json();
+
+            if (res.found && res.data.length > 0) {
+                pkgSelect.disabled = false;
+                pkgSelect.innerHTML = '<option value="" disabled selected>✅ Выберите пакет</option>';
+                res.data.forEach(item => {
+                    let opt = document.createElement('option');
+                    opt.value = item.n;
+                    opt.innerText = item.n;
+                    opt.dataset.sheet = item.s;
+                    opt.dataset.table = item.t;
+                    pkgSelect.appendChild(opt);
+                });
+            } else {
+                pkgSelect.innerHTML = `<option>❌ ${res.error || 'Рейсов нет'}</option>`;
+            }
+        } catch (e) {
+            alert("Ошибка связи с сервером");
+            pkgSelect.innerHTML = '<option>⚠️ Ошибка API</option>';
+        }
+    }
+
+    // Авто-поиск при вводе
+    dateInput.addEventListener('input', () => {
+        if (dateInput.value.length === 5) apiSearch();
+    });
+
+    // Запись ID при выборе пакета
+    pkgSelect.addEventListener('change', () => {
+        const opt = pkgSelect.options[pkgSelect.selectedIndex];
+        document.getElementById('sheet_name_hidden').value = opt.dataset.sheet || "";
+        document.getElementById('table_id_hidden').value = opt.dataset.table || "";
+    });
+
+    // Загрузка паломников из URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const pilgrimsRaw = urlParams.get('pilgrims');
+    if (pilgrimsRaw) {
+        const pList = JSON.parse(decodeURIComponent(pilgrimsRaw));
+        const container = document.getElementById('pilgrims-container');
+        container.innerHTML = pList.map(p => `
+            <div class="tourist-card">
+                <div class="tourist-name">👤 ${p.name}</div>
+                <input type="tel" class="phone-input" placeholder="Телефон">
+            </div>
+        `).join('');
+    }
+
+    if (tg.initDataUnsafe?.user) {
+        document.getElementById('manager').value = tg.initDataUnsafe.user.first_name;
+    }
+
     function getVal(id) {
         let el = document.getElementById(id);
         return el ? el.value : "-";
     }
 
-    try {
-        const urlParams = new URLSearchParams(window.location.search);
-
-        // 0) API BASE (приходит из бота как параметр api=...)
-        const API_BASE = urlParams.get('api'); // например https://YOUR-DOMAIN.COM
-
-        // 1) ЭЛЕМЕНТЫ
-        const dateInput = document.getElementById('date_input');
-        const pkgSelect = document.getElementById('pkg_name');
-
-        // 2) ТУРИСТЫ (как было)
-        const pilgrimsRaw = urlParams.get('pilgrims');
-        const pCont = document.getElementById('pilgrims-container');
-        if (pilgrimsRaw) {
-            const pList = JSON.parse(decodeURIComponent(pilgrimsRaw));
-            pCont.innerHTML = "";
-            pList.forEach(p => {
-                pCont.innerHTML += `
-                    <div class="tourist-card">
-                        <div class="tourist-name">👤 ${p.name}</div>
-                        <input type="tel" class="phone-input" placeholder="Номер телефона" value="${p.phone || ''}">
-                    </div>`;
-            });
-        }
-
-        if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
-            document.getElementById('manager').value = tg.initDataUnsafe.user.first_name;
-        }
-
-        // 3) ФУНКЦИЯ ЗАГРУЗКИ ПАКЕТОВ ПО ДАТЕ С БЭКА
-        async function fetchPackagesByDate(ddmm) {
-            if (!API_BASE) {
-                throw new Error("API base URL not provided (missing ?api= in WebApp URL)");
-            }
-
-            const url = `${API_BASE.replace(/\/$/, '')}/api/packages?date=${encodeURIComponent(ddmm)}`;
-            const resp = await fetch(url, { method: "GET" });
-
-            if (!resp.ok) {
-                throw new Error(`API error: ${resp.status}`);
-            }
-
-            // ожидаем JSON вида:
-            // { found: true/false, data: [{d,n,s,t}, ...], error?: "..." }
-            // или { packages: [...] }
-            const payload = await resp.json();
-
-            // Поддержка двух форматов ответа:
-            if (Array.isArray(payload)) return payload;
-            if (Array.isArray(payload.data)) return payload.data;
-            if (Array.isArray(payload.packages)) return payload.packages;
-
-            return [];
-        }
-
-        // 4) ЛОГИКА ВВОДА ДАТЫ (debounce + fetch)
-        let debounceTimer = null;
-
-        dateInput.addEventListener('input', function () {
-            let val = this.value;
-
-            // Авто-замена: пробел или слэш на точку (как было)
-            val = val.replace(/[\/\s,]/g, '.').trim();
-            this.value = val;
-
-            // Сброс выбранного пакета при изменении даты
-            document.getElementById('sheet_name_hidden').value = "";
-            document.getElementById('table_id_hidden').value = "";
-
-            // Подготовка UI
-            pkgSelect.innerHTML = '';
-            pkgSelect.disabled = true;
-
-            if (val.length < 4) {
-                let opt = document.createElement('option');
-                opt.innerText = "Введите дату...";
-                pkgSelect.appendChild(opt);
-                return;
-            }
-
-            // debounce чтобы не слать запросы на каждый символ
-            clearTimeout(debounceTimer);
-            debounceTimer = setTimeout(async () => {
-                pkgSelect.innerHTML = '<option>⏳ Ищу рейсы...</option>';
-                pkgSelect.disabled = true;
-
-                try {
-                    const list = await fetchPackagesByDate(val);
-
-                    pkgSelect.innerHTML = '';
-
-                    if (list.length > 0) {
-                        pkgSelect.disabled = false;
-
-                        let defOpt = document.createElement('option');
-                        defOpt.text = `Найдено: ${list.length} шт. (Выберите)`;
-                        defOpt.disabled = true;
-                        defOpt.selected = true;
-                        pkgSelect.appendChild(defOpt);
-
-                        list.forEach(item => {
-                            let opt = document.createElement('option');
-                            opt.value = item.n;
-                            opt.innerText = item.n;
-                            opt.setAttribute('data-sheet', item.s);
-                            opt.setAttribute('data-table', item.t);
-                            pkgSelect.appendChild(opt);
-                        });
-                    } else {
-                        pkgSelect.disabled = true;
-                        let opt = document.createElement('option');
-                        opt.innerText = "❌ Рейсов нет";
-                        pkgSelect.appendChild(opt);
-                    }
-                } catch (e) {
-                    pkgSelect.disabled = true;
-                    pkgSelect.innerHTML = '<option>⚠️ Ошибка поиска</option>';
-                }
-            }, 350);
-        });
-
-        // 5) СОХРАНЯЕМ ID ПРИ ВЫБОРЕ ПАКЕТА (как было)
-        pkgSelect.addEventListener('change', function () {
-            const opt = this.options[this.selectedIndex];
-            document.getElementById('sheet_name_hidden').value = opt.getAttribute('data-sheet') || "";
-            document.getElementById('table_id_hidden').value = opt.getAttribute('data-table') || "";
-        });
-
-    } catch (e) {
-        tg.showPopup({
-            title: "Ошибка",
-            message: e.toString()
-        });
-    }
-
-    // 6) ОТПРАВКА (не меняю, кроме мелких безопасных проверок)
     function sendData() {
-        try {
-            let price = document.getElementById("price").value;
-            let pkgName = document.getElementById("pkg_name").value;
-            let sheetName = document.getElementById("sheet_name_hidden").value;
+        const pkgName = pkgSelect.value;
+        const sheetName = document.getElementById('sheet_name_hidden').value;
+        const price = document.getElementById('price').value;
 
-            if (!price) {
-                tg.showPopup({ title: "Ошибка", message: "Укажите цену!" });
-                return;
-            }
-            if (!pkgName || !sheetName) {
-                tg.showPopup({ title: "Ошибка", message: "Введите дату и выберите пакет!" });
-                return;
-            }
-
-            let btn = document.querySelector('.submit-btn');
-            btn.innerText = "⏳ Отправка...";
-            btn.style.opacity = "0.7";
-
-            let phones = [];
-            document.querySelectorAll('.phone-input').forEach(i => phones.push(i.value || "-"));
-            let city = document.querySelector('input[name="city"]:checked').value;
-
-            let data = {
-                phones: phones,
-                pkg_name: pkgName,
-                sheet_name: sheetName,
-                table_id: document.getElementById("table_id_hidden").value,
-                city: city,
-                room: getVal("room"),
-                train: document.getElementById("train") ? getVal("train") : "-",
-                visa: getVal("visa"),
-                avia: getVal("avia"),
-                meal: getVal("meal"),
-                price: price,
-                paid: getVal("paid"),
-                contract: getVal("contract"),
-                rate: getVal("rate"),
-                discount: getVal("discount"),
-                source: getVal("source"),
-                region: getVal("region"),
-                manager: getVal("manager"),
-                comment: getVal("comment")
-            };
-
-            tg.sendData(JSON.stringify(data));
-            setTimeout(() => tg.close(), 100);
-
-        } catch (error) {
-            alert("JS Error: " + error.message);
+        if (!price || !pkgName || !sheetName) {
+            return tg.showPopup({ title: "Ошибка", message: "Заполните Дату, Пакет и Цену!" });
         }
+
+        const phones = Array.from(document.querySelectorAll('.phone-input')).map(i => i.value || "-");
+
+        const data = {
+            phones,
+            pkg_name: pkgName,
+            sheet_name: sheetName,
+            table_id: document.getElementById('table_id_hidden').value,
+            city: document.querySelector('input[name="city"]:checked').value,
+            room: getVal("room"),
+            visa: getVal("visa"),
+            avia: getVal("avia"),
+            meal: getVal("meal"),
+            price: price,
+            paid: getVal("paid"),
+            contract: getVal("contract"),
+            rate: getVal("rate"),
+            discount: getVal("discount"),
+            source: getVal("source"),
+            region: getVal("region"),
+            manager: getVal("manager"),
+            comment: getVal("comment"),
+            date_val: dateInput.value // отправляем дату для логов
+        };
+
+        tg.sendData(JSON.stringify(data));
+        setTimeout(() => tg.close(), 150);
     }
 </script>
-
 </body>
-
 </html>
