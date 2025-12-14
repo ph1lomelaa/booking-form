@@ -119,9 +119,9 @@
 
         <label>Метод бронирования:</label>
         <div class="city-buttons" style="flex-direction: column; gap: 8px;">
-            <input type="radio" name="place_method" id="meth_auto" value="auto" checked onchange="togglePlacementFields()"><label for="meth_auto">🎲 Автоматически (Тетрис)</label>
-            <input type="radio" name="place_method" id="meth_pick" value="pick" onchange="togglePlacementFields()"><label for="meth_pick">🤝 Подселить (Список мест)</label>
-            <input type="radio" name="place_method" id="meth_man" value="manual" onchange="togglePlacementFields()"><label for="meth_man">📍 В конкретную строку</label>
+            <input type="radio" name="place_method" id="meth_auto" value="auto" checked onchange="togglePlacementFields()"><label for="meth_auto"> Автоматически </label>
+            <input type="radio" name="place_method" id="meth_pick" value="pick" onchange="togglePlacementFields()"><label for="meth_pick"> Подселить (Список мест)</label>
+            <input type="radio" name="place_method" id="meth_man" value="manual" onchange="togglePlacementFields()"><label for="meth_man"> В конкретную строку</label>
         </div>
 
         <div id="rooms_list_container" style="display: none; margin-top: 15px;">
@@ -189,14 +189,16 @@
 
     // --- ПЕРЕХОД КО 2 ШАГУ ---
     function goToStep2() {
-        if (!document.getElementById('pkg_name').value || !document.getElementById('price').value) {
-            return alert("Сначала выберите Пакет и укажите Цену!");
-        }
+        // Проверка заполнения Шага 1
+        const pkg = document.getElementById('pkg_name').value;
+        const prc = document.getElementById('price').value;
+        if (!pkg || !prc) return alert("Заполните Пакет и Цену!");
+
         document.getElementById('step_1').style.display = 'none';
         document.getElementById('step_2').style.display = 'block';
 
-        if (pilgrimsCount > 1) document.getElementById('group_logic').style.display = 'block';
-        fetchAvailableRooms();
+        if (pListCount > 1) document.getElementById('group_logic').style.display = 'block';
+        fetchRooms(); // Загружаем комнаты для подселения
     }
 
     function backToStep1() {
@@ -237,34 +239,43 @@
     // --- ФИНАЛЬНАЯ ОТПРАВКА ---
     function finalSubmit() {
         const method = document.querySelector('input[name="place_method"]:checked').value;
-        let specific_row = null;
-        if (method === 'pick') specific_row = document.getElementById('room_select').value;
-        if (method === 'manual') specific_row = document.getElementById('manual_row_input').value;
+        let row = null;
+        if (method === 'pick') row = document.getElementById('room_select').value;
+        if (method === 'manual') row = document.getElementById('manual_row_input').value;
 
+        // СОБИРАЕМ ДАННЫЕ (Ключи должны совпадать с маппингом в booking_handlers.py)
         const data = {
             phones: Array.from(document.querySelectorAll('.phone-input')).map(i => i.value || "-"),
             pkg_name: document.getElementById('pkg_name').value,
             sheet_name: document.getElementById('sheet_name_hidden').value,
             table_id: document.getElementById('table_id_hidden').value,
+
             city: document.querySelector('input[name="city"]:checked').value,
             room: document.getElementById('room').value,
+            meal: document.getElementById('meal').value,
             visa: document.getElementById('visa').value,
             avia: document.getElementById('avia').value,
-            meal: document.getElementById('meal').value,
             price: document.getElementById('price').value,
-            paid: document.getElementById('paid').value,
+            amount_paid: document.getElementById('paid').value,
+
+            contract: document.getElementById('contract').value,
+            rate: document.getElementById('rate').value,
+            discount: document.getElementById('discount').value,
+            source: document.getElementById('source').value,
             region: document.getElementById('region').value,
+            train: document.getElementById('train').value,
             manager: document.getElementById('manager').value,
             comment: document.getElementById('comment').value,
-            // Размещение
+
+            // Данные размещения (Шаг 2)
             place_mode: document.querySelector('input[name="place_mode"]:checked')?.value || 'separate',
             place_method: method,
-            specific_row: specific_row,
+            specific_row: row,
             is_share: method === 'pick'
         };
 
-        tg.sendData(JSON.stringify(data));
-        setTimeout(() => tg.close(), 150);
+        tg.sendData(JSON.stringify(data)); // Отправляем боту
+        tg.close();
     }
 </script>
 </body>
