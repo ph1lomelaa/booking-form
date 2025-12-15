@@ -251,43 +251,50 @@
     }
 
     // --- ФИНАЛЬНАЯ ОТПРАВКА ---
-    async function finalSubmit() {
-        const method = document.querySelector('input[name="place_method"]:checked').value;
-        let row = null;
-        if (method === 'pick') row = document.getElementById('room_select').value;
-        if (method === 'manual') row = document.getElementById('manual_row_input').value;
+    async function finalSubmit(e) {
+        // если кнопка/событие внутри <form> — остановим стандартный submit
+        if (e && typeof e.preventDefault === "function") e.preventDefault();
 
-        const btn = document.getElementById('finish_btn');
-        btn.innerText = "⏳ ЗАПИСЬ...";
-        btn.disabled = true;
+        const method = document.querySelector('input[name="place_method"]:checked')?.value || "auto";
+        let row = null;
+
+        if (method === "pick") row = document.getElementById("room_select")?.value || null;
+        if (method === "manual") row = document.getElementById("manual_row_input")?.value || null;
+
+        const btn = document.getElementById("finish_btn");
+        if (btn) {
+            btn.innerText = "⏳ ЗАПИСЬ...";
+            btn.disabled = true;
+        }
 
         const data = {
-            phones: Array.from(document.querySelectorAll('.phone-input')).map(i => i.value || "-"),
-            package_name: document.getElementById('pkg_name').value,
-            sheet_name: document.getElementById('sheet_name_hidden').value,
-            table_id: document.getElementById('table_id_hidden').value,
-            departure_city: document.querySelector('input[name="departure_city"]:checked').value,
-            room_type: document.getElementById('room_type').value,
-            meal_type: document.getElementById('meal_type').value,
-            visa_status: document.getElementById('visa_status').value,
-            avia: document.getElementById('avia').value,
-            price: document.getElementById('price').value,
-            amount_paid: document.getElementById('amount_paid').value,
-            contract_number: document.getElementById('contract_number').value,
-            exchange_rate: document.getElementById('exchange_rate').value,
-            discount: document.getElementById('discount').value,
-            source: document.getElementById('source').value,
-            region: document.getElementById('region').value,
-            train: document.getElementById('train').value,
-            manager_name_text: document.getElementById('manager_name_text').value,
-            comment: document.getElementById('comment').value,
-            placement_type: document.querySelector('input[name="placement_type"]:checked')?.value || 'separate',
+            phones: Array.from(document.querySelectorAll(".phone-input")).map((i) => i.value || "-"),
+            package_name: document.getElementById("pkg_name")?.value || "",
+            sheet_name: document.getElementById("sheet_name_hidden")?.value || "",
+            table_id: document.getElementById("table_id_hidden")?.value || "",
+            departure_city: document.querySelector('input[name="departure_city"]:checked')?.value || "-",
+            room_type: document.getElementById("room_type")?.value || "",
+            meal_type: document.getElementById("meal_type")?.value || "-",
+            visa_status: document.getElementById("visa_status")?.value || "UMRAH VISA",
+            avia: document.getElementById("avia")?.value || "-",
+            price: document.getElementById("price")?.value || "0",
+            amount_paid: document.getElementById("amount_paid")?.value || "0",
+            contract_number: document.getElementById("contract_number")?.value || "-",
+            exchange_rate: document.getElementById("exchange_rate")?.value || "495",
+            discount: document.getElementById("discount")?.value || "-",
+            source: document.getElementById("source")?.value || "-",
+            region: document.getElementById("region")?.value || "-",
+            train: document.getElementById("train")?.value || "-",
+            manager_name_text: document.getElementById("manager_name_text")?.value || "-",
+            comment: document.getElementById("comment")?.value || "-",
+            placement_type:
+                document.querySelector('input[name="placement_type"]:checked')?.value || "separate",
             place_method: method,
             specific_row: row ? parseInt(row, 10) : null,
-            is_share: method === 'pick',
+            is_share: method === "pick",
 
-            // важно: прокидываем ID юзера телеги
-            manager_id: tg.initDataUnsafe?.user?.id || null
+            // ID пользователя Telegram (если WebApp открыт внутри Telegram)
+            manager_id: tg?.initDataUnsafe?.user?.id || null,
         };
 
         try {
@@ -295,29 +302,42 @@
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    "ngrok-skip-browser-warning": "1"
+                    "ngrok-skip-browser-warning": "1",
                 },
-                body: JSON.stringify(data)
+                body: JSON.stringify(data),
             });
 
-            const res = await r.json();
+            let res = {};
+            try {
+                res = await r.json();
+            } catch (_) {
+                res = {};
+            }
 
             if (!r.ok || !res.ok) {
-                tg.showAlert(`❌ Ошибка записи: ${res?.detail || res?.error || JSON.stringify(res)}`);
-                btn.innerText = "✅ ЗАВЕРШИТЬ И ЗАПИСАТЬ";
-                btn.disabled = false;
+                tg?.showAlert(
+                    `❌ Ошибка записи: ${res?.detail || res?.error || `HTTP ${r.status}`}`
+                );
+                if (btn) {
+                    btn.innerText = "✅ ЗАВЕРШИТЬ И ЗАПИСАТЬ";
+                    btn.disabled = false;
+                }
                 return;
             }
 
-            tg.showAlert(`✅ Записано! Строки: ${res.saved_rows?.join(", ") || "-"}`);
-            tg.close();
-
-        } catch (e) {
-            tg.showAlert("❌ Ошибка связи с сервером: " + e.message);
-            btn.innerText = "✅ ЗАВЕРШИТЬ И ЗАПИСАТЬ";
-            btn.disabled = false;
+            // Важно: закрываем ТОЛЬКО после того, как пользователь увидит алерт
+            tg?.showAlert(`✅ Записано! Строки: ${res.saved_rows?.join(", ") || "-"}`, () => {
+                tg?.close();
+            });
+        } catch (err) {
+            tg?.showAlert("❌ Ошибка связи с сервером: " + (err?.message || String(err)));
+            if (btn) {
+                btn.innerText = "✅ ЗАВЕРШИТЬ И ЗАПИСАТЬ";
+                btn.disabled = false;
+            }
         }
     }
+
 </script>
 </body>
 </html>
