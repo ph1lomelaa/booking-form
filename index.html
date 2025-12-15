@@ -257,13 +257,11 @@
         if (method === 'pick') row = document.getElementById('room_select').value;
         if (method === 'manual') row = document.getElementById('manual_row_input').value;
 
-        // СОБИРАЕМ ДАННЫЕ СТРОГО ПО МОДЕЛИ БД
         const data = {
             phones: Array.from(document.querySelectorAll('.phone-input')).map(i => i.value || "-"),
             package_name: document.getElementById('pkg_name').value,
             sheet_name: document.getElementById('sheet_name_hidden').value,
             table_id: document.getElementById('table_id_hidden').value,
-
             departure_city: document.querySelector('input[name="departure_city"]:checked').value,
             room_type: document.getElementById('room_type').value,
             meal_type: document.getElementById('meal_type').value,
@@ -271,7 +269,6 @@
             avia: document.getElementById('avia').value,
             price: document.getElementById('price').value,
             amount_paid: document.getElementById('amount_paid').value,
-
             contract_number: document.getElementById('contract_number').value,
             exchange_rate: document.getElementById('exchange_rate').value,
             discount: document.getElementById('discount').value,
@@ -280,15 +277,13 @@
             train: document.getElementById('train').value,
             manager_name_text: document.getElementById('manager_name_text').value,
             comment: document.getElementById('comment').value,
-
-            // Логика размещения (Шаг 2)
             placement_type: document.querySelector('input[name="placement_type"]:checked')?.value || 'separate',
             place_method: method,
             specific_row: row,
             is_share: method === 'pick'
         };
 
-        tg.sendData(JSON.stringify(data));
+        tg.sendData(JSON.stringify(data)); // Отправляем в Бот
         tg.close();
     }
 
