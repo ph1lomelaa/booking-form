@@ -249,42 +249,75 @@
             }
         } catch(e) { sel.innerHTML = '<option>Ошибка загрузки</option>'; }
     }
-
-    // --- ФИНАЛЬНАЯ ОТПРАВКА ---
-    function finalSubmit() {
+        async function finalSubmit() {
         const method = document.querySelector('input[name="place_method"]:checked').value;
         let row = null;
         if (method === 'pick') row = document.getElementById('room_select').value;
         if (method === 'manual') row = document.getElementById('manual_row_input').value;
 
         const data = {
-            phones: Array.from(document.querySelectorAll('.phone-input')).map(i => i.value || "-"),
-            package_name: document.getElementById('pkg_name').value,
-            sheet_name: document.getElementById('sheet_name_hidden').value,
-            table_id: document.getElementById('table_id_hidden').value,
-            departure_city: document.querySelector('input[name="departure_city"]:checked').value,
-            room_type: document.getElementById('room_type').value,
-            meal_type: document.getElementById('meal_type').value,
-            visa_status: document.getElementById('visa_status').value,
-            avia: document.getElementById('avia').value,
-            price: document.getElementById('price').value,
-            amount_paid: document.getElementById('amount_paid').value,
-            contract_number: document.getElementById('contract_number').value,
-            exchange_rate: document.getElementById('exchange_rate').value,
-            discount: document.getElementById('discount').value,
-            source: document.getElementById('source').value,
-            region: document.getElementById('region').value,
-            train: document.getElementById('train').value,
-            manager_name_text: document.getElementById('manager_name_text').value,
-            comment: document.getElementById('comment').value,
-            placement_type: document.querySelector('input[name="placement_type"]:checked')?.value || 'separate',
-            place_method: method,
-            specific_row: row,
-            is_share: method === 'pick'
-        };
+        phones: Array.from(document.querySelectorAll('.phone-input')).map(i => i.value || "-"),
+        package_name: document.getElementById('pkg_name').value,
+        sheet_name: document.getElementById('sheet_name_hidden').value,
+        table_id: document.getElementById('table_id_hidden').value,
 
-        tg.sendData(JSON.stringify(data)); // Отправляем в Бот
+        departure_city: document.querySelector('input[name="departure_city"]:checked').value,
+        room_type: document.getElementById('room_type').value,
+        meal_type: document.getElementById('meal_type').value,
+        visa_status: document.getElementById('visa_status').value,
+        avia: document.getElementById('avia').value,
+        price: document.getElementById('price').value,
+        amount_paid: document.getElementById('amount_paid').value,
+        contract_number: document.getElementById('contract_number').value,
+        exchange_rate: document.getElementById('exchange_rate').value,
+        discount: document.getElementById('discount').value,
+        source: document.getElementById('source').value,
+        region: document.getElementById('region').value,
+        train: document.getElementById('train').value,
+        manager_name_text: document.getElementById('manager_name_text').value,
+        comment: document.getElementById('comment').value,
+
+        placement_type: document.querySelector('input[name="placement_type"]:checked')?.value || 'separate',
+        place_method: method,
+        specific_row: row,
+        is_share: method === 'pick'
+    };
+
+        try {
+        const btn = document.getElementById('finish_btn');
+        btn.disabled = true;
+        btn.textContent = "⏳ Записываю...";
+
+        const res = await fetch(`${API_URL}/api/bookings/submit`, {
+        method: "POST",
+        headers: {
+        "Content-Type": "application/json",
+        "ngrok-skip-browser-warning": "1"
+    },
+        body: JSON.stringify(data)
+    });
+
+        const json = await res.json().catch(() => ({}));
+
+        if (!res.ok || !json.ok) {
+        const msg = json.error || `Ошибка сервера: ${res.status}`;
+        alert("❌ Ошибка размещения: " + msg);
+        btn.disabled = false;
+        btn.textContent = "✅ ЗАВЕРШИТЬ И ЗАПИСАТЬ";
+        return;
+    }
+
+        // Можно при желании переслать результат в бот
+        // tg.sendData(JSON.stringify({ type: "booking_done", ...json }));
+
+        alert("✅ Бронь успешно размещена!");
         tg.close();
+    } catch (e) {
+        alert("❌ Ошибка сети: " + e);
+        const btn = document.getElementById('finish_btn');
+        btn.disabled = false;
+        btn.textContent = "✅ ЗАВЕРШИТЬ И ЗАПИСАТЬ";
+    }
     }
 
 </script>
