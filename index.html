@@ -251,15 +251,7 @@
     }
 
     // --- ФИНАЛЬНАЯ ОТПРАВКА ---
-    function finalSubmit() {
-        console.log("🟢 Функция finalSubmit вызвана");
-
-        // 1. Проверяем доступность Telegram WebApp
-        if (!tg || !tg.sendData) {
-            alert("❌ Ошибка: Telegram WebApp не инициализирован");
-            return;
-        }
-
+    async function finalSubmit() {
         const method = document.querySelector('input[name="place_method"]:checked').value;
         let row = null;
         if (method === 'pick') row = document.getElementById('room_select').value;
@@ -269,7 +261,6 @@
         btn.innerText = "⏳ ЗАПИСЬ...";
         btn.disabled = true;
 
-        // 2. Собираем данные
         const data = {
             phones: Array.from(document.querySelectorAll('.phone-input')).map(i => i.value || "-"),
             package_name: document.getElementById('pkg_name').value,
@@ -292,38 +283,37 @@
             comment: document.getElementById('comment').value,
             placement_type: document.querySelector('input[name="placement_type"]:checked')?.value || 'separate',
             place_method: method,
-            specific_row: row,
-            is_share: method === 'pick'
+            specific_row: row ? parseInt(row, 10) : null,
+            is_share: method === 'pick',
+
+            // важно: прокидываем ID юзера телеги
+            manager_id: tg.initDataUnsafe?.user?.id || null
         };
 
-        console.log("📦 Собранные данные:", data);
-
-        // 3. Проверяем обязательные поля
-        if (!data.package_name || !data.price) {
-            alert("❌ Заполните обязательные поля: Пакет и Цена!");
-            btn.innerText = "✅ ЗАВЕРШИТЬ И ЗАПИСАТЬ";
-            btn.disabled = false;
-            return;
-        }
-
-        // 4. Отправляем
         try {
-            const jsonData = JSON.stringify(data);
-            console.log("📤 Отправка JSON:", jsonData);
+            const r = await fetch(`${API_URL}/api/bookings/submit`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "ngrok-skip-browser-warning": "1"
+                },
+                body: JSON.stringify(data)
+            });
 
-            tg.sendData(jsonData);
-            console.log("✅ Данные отправлены в Telegram");
+            const res = await r.json();
 
-            // Закрываем веб-приложение
-            setTimeout(() => {
-                tg.close();
-                console.log("📱 Веб-приложение закрыто");
-            }, 300);
+            if (!r.ok || !res.ok) {
+                tg.showAlert(`❌ Ошибка записи: ${res?.detail || res?.error || JSON.stringify(res)}`);
+                btn.innerText = "✅ ЗАВЕРШИТЬ И ЗАПИСАТЬ";
+                btn.disabled = false;
+                return;
+            }
 
-        } catch (error) {
-            console.error("❌ Ошибка отправки:", error);
-            alert("Ошибка отправки данных: " + error.message);
+            tg.showAlert(`✅ Записано! Строки: ${res.saved_rows?.join(", ") || "-"}`);
+            tg.close();
 
+        } catch (e) {
+            tg.showAlert("❌ Ошибка связи с сервером: " + e.message);
             btn.innerText = "✅ ЗАВЕРШИТЬ И ЗАПИСАТЬ";
             btn.disabled = false;
         }
