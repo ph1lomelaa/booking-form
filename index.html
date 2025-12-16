@@ -202,10 +202,10 @@
                 passport_expiry: "-",
                 iin: "-"
             }));
-            
+
             renderPilgrims();
-        } catch(e) { 
-            console.error("Ошибка списка паломников"); 
+        } catch(e) {
+            console.error("Ошибка списка паломников");
         }
     }
 
@@ -220,7 +220,7 @@
                     </button>
                 </div>
                 <input type="tel" class="phone-input" data-idx="${idx}" placeholder="Номер телефона" value="${p.phone}">
-                
+
                 <div id="passport_${idx}" class="passport-data">
                     <div class="passport-field"><strong>Фамилия:</strong> ${p.last_name}</div>
                     <div class="passport-field"><strong>Имя:</strong> ${p.first_name}</div>
