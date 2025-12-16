@@ -147,7 +147,7 @@
     tg.expand();
 
     const API_URL = "https://gainless-computably-pablo.ngrok-free.dev";
-    let pilgrimsData = []; // Массив с данными паломников
+    let pilgrimsData = [];
 
     // --- ПОИСК ПАКЕТОВ ---
     async function handleSearch() {
@@ -185,27 +185,34 @@
         document.getElementById('table_id_hidden').value = opt.dataset.table;
     };
 
-    // --- ТУРИСТЫ ИЗ URL ---
+    // --- 🔥 ИСПРАВЛЕННЫЙ ПАРСИНГ ТУРИСТОВ ИЗ URL ---
     const urlParams = new URLSearchParams(window.location.search);
     const pRaw = urlParams.get('pilgrims');
+
+    console.log("📥 URL параметр pilgrims:", pRaw);
+
     if (pRaw) {
         try {
             const pilgrims = JSON.parse(decodeURIComponent(pRaw));
+            console.log("✅ Декодированные данные:", pilgrims);
+
             pilgrimsData = pilgrims.map(p => ({
-                name: p.name || "-",
-                first_name: "-",
-                last_name: "-",
-                phone: "-",
-                passport_num: "-",
-                date_of_birth: "-",
-                gender: "M",
-                passport_expiry: "-",
-                iin: "-"
+                name: p.name || `${p.last_name || '-'} ${p.first_name || '-'}`,
+                last_name: p.last_name || "-",
+                first_name: p.first_name || "-",
+                phone: p.phone || "-",
+                passport_num: p.passport_num || "-",
+                date_of_birth: p.date_of_birth || "-",
+                gender: p.gender || "M",
+                passport_expiry: p.passport_expiry || "-",
+                iin: p.iin || "-"
             }));
 
+            console.log("📋 Финальный pilgrimsData:", pilgrimsData);
             renderPilgrims();
         } catch(e) {
-            console.error("Ошибка списка паломников");
+            console.error("❌ Ошибка парсинга данных:", e);
+            alert("Ошибка загрузки данных паспортов");
         }
     }
 
@@ -219,7 +226,7 @@
                         📋 Паспорт
                     </button>
                 </div>
-                <input type="tel" class="phone-input" data-idx="${idx}" placeholder="Номер телефона" value="${p.phone}">
+                <input type="tel" class="phone-input" data-idx="${idx}" placeholder="Номер телефона" value="${p.phone !== '-' ? p.phone : ''}">
 
                 <div id="passport_${idx}" class="passport-data">
                     <div class="passport-field"><strong>Фамилия:</strong> ${p.last_name}</div>
@@ -227,12 +234,12 @@
                     <div class="passport-field"><strong>Пол:</strong> ${p.gender}</div>
                     <div class="passport-field"><strong>Дата рождения:</strong> ${p.date_of_birth}</div>
                     <div class="passport-field"><strong>Паспорт:</strong> ${p.passport_num}</div>
+                    <div class="passport-field"><strong>Срок действия:</strong> ${p.passport_expiry}</div>
                     <div class="passport-field"><strong>ИИН:</strong> ${p.iin}</div>
                 </div>
             </div>
         `).join('');
 
-        // Слушаем изменения телефона
         document.querySelectorAll('.phone-input').forEach(input => {
             input.addEventListener('input', (e) => {
                 const idx = e.target.dataset.idx;
@@ -246,12 +253,10 @@
         el.classList.toggle('visible');
     }
 
-    // Берем имя менеджера из данных Telegram
     if (tg.initDataUnsafe?.user) {
         document.getElementById('manager_name_text').value = tg.initDataUnsafe.user.first_name;
     }
 
-    // --- ЛОГИКА ШАГОВ ---
     function goToStep2() {
         const pkg = document.getElementById('pkg_name').value;
         const price = document.getElementById('price').value;
@@ -275,7 +280,6 @@
         document.getElementById('manual_div').style.display = m === 'manual' ? 'block' : 'none';
     }
 
-    // --- ПОИСК СВОБОДНЫХ МЕСТ ---
     async function fetchAvailableRooms() {
         const sel = document.getElementById('room_select');
         sel.innerHTML = '<option>⏳ Загрузка комнат...</option>';
@@ -305,7 +309,7 @@
         if (method === 'pick') row = document.getElementById('room_select').value;
         if (method === 'manual') row = document.getElementById('manual_row_input').value;
 
-        // Формируем данные паломников
+        // 🔥 КРИТИЧНО: Собираем ВСЕ данные паспорта
         const pilgrims = pilgrimsData.map(p => ({
             first_name: p.first_name,
             last_name: p.last_name,
@@ -316,6 +320,8 @@
             passport_expiry: p.passport_expiry,
             iin: p.iin
         }));
+
+        console.log("📤 Отправка данных на сервер:", pilgrims);
 
         const data = {
             pilgrims: pilgrims,
