@@ -25,6 +25,10 @@
         .tourist-card { background: #fff; border: 1px solid #e0e0e0; border-radius: 12px; padding: 12px; margin-bottom: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
         .submit-btn { width: 100%; padding: 16px; margin-top: 20px; border: none; border-radius: 14px; background: var(--btn-color); color: #fff; font-size: 16px; font-weight: 700; cursor: pointer; }
         .smart-box { background: #f9f9f9; padding: 15px; border-radius: 12px; border: 1px solid #eee; margin-bottom: 15px; }
+        .passport-data { background: #e8f5e9; padding: 10px; border-radius: 8px; margin-top: 10px; display: none; }
+        .passport-data.visible { display: block; }
+        .passport-field { font-size: 13px; margin: 4px 0; }
+        .passport-field strong { color: #2e7d32; }
     </style>
 </head>
 <body>
@@ -120,7 +124,7 @@
         <div class="city-buttons" style="flex-direction: column; gap: 8px;">
             <input type="radio" name="place_method" id="meth_auto" value="auto" checked onchange="updateUI()"><label for="meth_auto">🎲 Автоматически (Тетрис)</label>
             <input type="radio" name="place_method" id="meth_pick" value="pick" onchange="updateUI()"><label for="meth_pick">🤝 Подселить (Список)</label>
-            <input type="radio" name="place_method" id="meth_man" value="manual" onchange="updateUI()"><label for="meth_man">📍 В конкретную строку</label>
+            <input type="radio" name="place_method" id="meth_man" value="manual" onchange="updateUI()"><label for="meth_man">📝 В конкретную строку</label>
         </div>
 
         <div id="room_list_div" style="display: none; margin-top: 15px;">
@@ -142,9 +146,8 @@
     let tg = window.Telegram.WebApp;
     tg.expand();
 
-    // 🛑 ПРОВЕРЬ: Ссылка должна совпадать с ngrok!
     const API_URL = "https://gainless-computably-pablo.ngrok-free.dev";
-    let pilgrimsCount = 0;
+    let pilgrimsData = []; // Массив с данными паломников
 
     // --- ПОИСК ПАКЕТОВ ---
     async function handleSearch() {
@@ -163,7 +166,6 @@
             if (res.found) {
                 sel.disabled = false;
                 sel.innerHTML = res.data.map(i => `<option value="${i.n}" data-sheet="${i.s}" data-table="${i.t}">${i.n}</option>`).join('');
-                // Сразу записываем ID первой таблицы
                 document.getElementById('sheet_name_hidden').value = res.data[0].s;
                 document.getElementById('table_id_hidden').value = res.data[0].t;
             } else {
@@ -173,7 +175,6 @@
         } catch(e) { alert("Ошибка связи с сервером"); }
     }
 
-    // Авто-поиск при вводе даты
     document.getElementById('date_input').addEventListener('input', function() {
         if (this.value.length === 5) handleSearch();
     });
@@ -190,11 +191,59 @@
     if (pRaw) {
         try {
             const pilgrims = JSON.parse(decodeURIComponent(pRaw));
-            pilgrimsCount = pilgrims.length;
-            document.getElementById('pilgrims-container').innerHTML = pilgrims.map(p => `
-                <div class="tourist-card">👤 <b>${p.name}</b><input type="tel" class="phone-input" placeholder="Номер телефона"></div>
-            `).join('');
-        } catch(e) { console.error("Ошибка списка паломников"); }
+            pilgrimsData = pilgrims.map(p => ({
+                name: p.name || "-",
+                first_name: "-",
+                last_name: "-",
+                phone: "-",
+                passport_num: "-",
+                date_of_birth: "-",
+                gender: "M",
+                passport_expiry: "-",
+                iin: "-"
+            }));
+            
+            renderPilgrims();
+        } catch(e) { 
+            console.error("Ошибка списка паломников"); 
+        }
+    }
+
+    function renderPilgrims() {
+        const container = document.getElementById('pilgrims-container');
+        container.innerHTML = pilgrimsData.map((p, idx) => `
+            <div class="tourist-card">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span>👤 <b>${p.name}</b></span>
+                    <button onclick="togglePassportData(${idx})" style="background: var(--btn-color); color: white; border: none; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-size: 12px;">
+                        📋 Паспорт
+                    </button>
+                </div>
+                <input type="tel" class="phone-input" data-idx="${idx}" placeholder="Номер телефона" value="${p.phone}">
+                
+                <div id="passport_${idx}" class="passport-data">
+                    <div class="passport-field"><strong>Фамилия:</strong> ${p.last_name}</div>
+                    <div class="passport-field"><strong>Имя:</strong> ${p.first_name}</div>
+                    <div class="passport-field"><strong>Пол:</strong> ${p.gender}</div>
+                    <div class="passport-field"><strong>Дата рождения:</strong> ${p.date_of_birth}</div>
+                    <div class="passport-field"><strong>Паспорт:</strong> ${p.passport_num}</div>
+                    <div class="passport-field"><strong>ИИН:</strong> ${p.iin}</div>
+                </div>
+            </div>
+        `).join('');
+
+        // Слушаем изменения телефона
+        document.querySelectorAll('.phone-input').forEach(input => {
+            input.addEventListener('input', (e) => {
+                const idx = e.target.dataset.idx;
+                pilgrimsData[idx].phone = e.target.value;
+            });
+        });
+    }
+
+    function togglePassportData(idx) {
+        const el = document.getElementById(`passport_${idx}`);
+        el.classList.toggle('visible');
     }
 
     // Берем имя менеджера из данных Telegram
@@ -211,7 +260,7 @@
         document.getElementById('step_1').style.display = 'none';
         document.getElementById('step_2').style.display = 'block';
 
-        if (pilgrimsCount > 1) document.getElementById('group_logic').style.display = 'block';
+        if (pilgrimsData.length > 1) document.getElementById('group_logic').style.display = 'block';
         fetchAvailableRooms();
     }
 
@@ -235,7 +284,7 @@
             table_id: document.getElementById('table_id_hidden').value,
             sheet_name: document.getElementById('sheet_name_hidden').value,
             package_name: document.getElementById('pkg_name').value,
-            count: pilgrimsCount,
+            count: pilgrimsData.length,
             room_type: document.getElementById('room_type').value
         });
 
@@ -249,75 +298,83 @@
             }
         } catch(e) { sel.innerHTML = '<option>Ошибка загрузки</option>'; }
     }
-        async function finalSubmit() {
+
+    async function finalSubmit() {
         const method = document.querySelector('input[name="place_method"]:checked').value;
         let row = null;
         if (method === 'pick') row = document.getElementById('room_select').value;
         if (method === 'manual') row = document.getElementById('manual_row_input').value;
 
+        // Формируем данные паломников
+        const pilgrims = pilgrimsData.map(p => ({
+            first_name: p.first_name,
+            last_name: p.last_name,
+            phone: p.phone,
+            passport_num: p.passport_num,
+            date_of_birth: p.date_of_birth,
+            gender: p.gender,
+            passport_expiry: p.passport_expiry,
+            iin: p.iin
+        }));
+
         const data = {
-        phones: Array.from(document.querySelectorAll('.phone-input')).map(i => i.value || "-"),
-        package_name: document.getElementById('pkg_name').value,
-        sheet_name: document.getElementById('sheet_name_hidden').value,
-        table_id: document.getElementById('table_id_hidden').value,
+            pilgrims: pilgrims,
+            package_name: document.getElementById('pkg_name').value,
+            sheet_name: document.getElementById('sheet_name_hidden').value,
+            table_id: document.getElementById('table_id_hidden').value,
 
-        departure_city: document.querySelector('input[name="departure_city"]:checked').value,
-        room_type: document.getElementById('room_type').value,
-        meal_type: document.getElementById('meal_type').value,
-        visa_status: document.getElementById('visa_status').value,
-        avia: document.getElementById('avia').value,
-        price: document.getElementById('price').value,
-        amount_paid: document.getElementById('amount_paid').value,
-        contract_number: document.getElementById('contract_number').value,
-        exchange_rate: document.getElementById('exchange_rate').value,
-        discount: document.getElementById('discount').value,
-        source: document.getElementById('source').value,
-        region: document.getElementById('region').value,
-        train: document.getElementById('train').value,
-        manager_name_text: document.getElementById('manager_name_text').value,
-        comment: document.getElementById('comment').value,
+            departure_city: document.querySelector('input[name="departure_city"]:checked').value,
+            room_type: document.getElementById('room_type').value,
+            meal_type: document.getElementById('meal_type').value,
+            visa_status: document.getElementById('visa_status').value,
+            avia: document.getElementById('avia').value,
+            price: document.getElementById('price').value,
+            amount_paid: document.getElementById('amount_paid').value,
+            contract_number: document.getElementById('contract_number').value,
+            exchange_rate: document.getElementById('exchange_rate').value,
+            discount: document.getElementById('discount').value,
+            source: document.getElementById('source').value,
+            region: document.getElementById('region').value,
+            train: document.getElementById('train').value,
+            manager_name_text: document.getElementById('manager_name_text').value,
+            comment: document.getElementById('comment').value,
 
-        placement_type: document.querySelector('input[name="placement_type"]:checked')?.value || 'separate',
-        place_method: method,
-        specific_row: row,
-        is_share: method === 'pick'
-    };
+            placement_type: document.querySelector('input[name="placement_type"]:checked')?.value || 'separate',
+            specific_row: row ? parseInt(row) : null,
+        };
 
         try {
-        const btn = document.getElementById('finish_btn');
-        btn.disabled = true;
-        btn.textContent = "⏳ Записываю...";
+            const btn = document.getElementById('finish_btn');
+            btn.disabled = true;
+            btn.textContent = "⏳ Записываю...";
 
-        const res = await fetch(`${API_URL}/api/bookings/submit`, {
-        method: "POST",
-        headers: {
-        "Content-Type": "application/json",
-        "ngrok-skip-browser-warning": "1"
-    },
-        body: JSON.stringify(data)
-    });
+            const res = await fetch(`${API_URL}/api/bookings/submit`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "ngrok-skip-browser-warning": "1"
+                },
+                body: JSON.stringify(data)
+            });
 
-        const json = await res.json().catch(() => ({}));
+            const json = await res.json().catch(() => ({}));
 
-        if (!res.ok || !json.ok) {
-        const msg = json.error || `Ошибка сервера: ${res.status}`;
-        alert("❌ Ошибка размещения: " + msg);
-        btn.disabled = false;
-        btn.textContent = "✅ ЗАВЕРШИТЬ И ЗАПИСАТЬ";
-        return;
-    }
+            if (!res.ok || !json.ok) {
+                const msg = json.error || `Ошибка сервера: ${res.status}`;
+                alert("❌ Ошибка размещения: " + msg);
+                btn.disabled = false;
+                btn.textContent = "✅ ЗАВЕРШИТЬ И ЗАПИСАТЬ";
+                return;
+            }
 
-        // Можно при желании переслать результат в бот
-        // tg.sendData(JSON.stringify({ type: "booking_done", ...json }));
-
-        alert("✅ Бронь успешно размещена!");
-        tg.close();
-    } catch (e) {
-        alert("❌ Ошибка сети: " + e);
-        const btn = document.getElementById('finish_btn');
-        btn.disabled = false;
-        btn.textContent = "✅ ЗАВЕРШИТЬ И ЗАПИСАТЬ";
-    }
+            alert("✅ Бронь успешно размещена!");
+            tg.close();
+        } catch (e) {
+            alert("❌ Ошибка сети: " + e);
+            const btn = document.getElementById('finish_btn');
+            btn.disabled = false;
+            btn.textContent = "✅ ЗАВЕРШИТЬ И ЗАПИСАТЬ";
+        }
     }
 
 </script>
